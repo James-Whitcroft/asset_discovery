@@ -1,5 +1,7 @@
 #!/bin/bash
-
+#Ju Youn Chae
+#Audit Group 6 
+#Question 5
 hosts=()
 if [[ $1 == */* ]]; then
         hosts=$(prips $1)
