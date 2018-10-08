@@ -29,15 +29,30 @@ function decimal_to_addr {
 
 <# ping from decimal representation of ip addr to addr + range #>
 function ping_range {
-  Param($addr, $range)
+  Param($addr, $range, $quiet)
   [string]$ping_to = $addr
-  $up_hosts = @() <# create an empty array #>
+  $up_hosts = @{} <# create an empty hashtable #>
   for($x = 0; $x -lt $range; $x++) {
-    write-host "Pinging " $ping_to
-    $ret = ping $ping_to -n 1 -w 50 <# run ping command #>
+    if( -not $quiet) { write-host "Pinging " $ping_to }
+    $ret = ping $ping_to -n 1 -w 100 <# run ping command #>
     if(( -not ($ret -match "unreachable")) -and  (-not ($ret -match "timed out"))){
-      write-host "Host " $ping_to " UP"
-      $up_hosts += $ping_to <# found a host, append to return array #>
+      if( -not $quiet) { write-host "Host " $ping_to " UP" }
+      $test = $ret.split(" ").where{ $_ -match "TTL="}
+      $test = $test.split("=")
+      $test = $test[-1]
+      <# checkin TTL for OS guess 
+       # could be more accutate with hop count
+       # but it is faster this way
+       #>
+      if([convert]::ToInt64($test, 10) -gt 100) {
+        if( -not $quiet) { write-host "Likely Windows OS" }
+        $os = "Windows"
+      } else {
+        if( -not $quiet) { write-host "Likely *nix OS" }
+        $os = "Linux"
+      }
+      
+      $up_hosts[$ping_to] = $os <# found a host, append to return array #>
     }
     <# convert ip to decimal and increment by one #>
     $ping_to = (addr_to_decimal -addr $ping_to) + 1
@@ -46,7 +61,6 @@ function ping_range {
   }
   return $up_hosts
 }
-
 
 function parse_range {
   Param($range)
@@ -67,7 +81,7 @@ function parse_range {
 }
 
 
-function main {
+function main_ping_sweep {
   $user_range = read-host "Enter IP range or CIDR notation >> "
   
   $parsed = parse_range -range $user_range <# parses input and labels it as range or cidr notation #>
@@ -78,7 +92,7 @@ function main {
     $end = addr_to_decimal -addr $parsed[1] <# convert stop ip to decimal #>
     $range = ($end - $start) + 1 <# find delta, inclusive #>
     $ping_to = decimal_to_addr -decimal $start
-    $up_hosts = ping_range -addr $ping_to -range $range
+    $up_hosts = ping_range -addr $ping_to -range $range -quiet 0
   }
   elseif($parsed[-1] -eq "cidr") {
     $start = addr_to_decimal -addr $parsed[0]
@@ -86,17 +100,42 @@ function main {
     $range = 1 -shl (32 - $parsed[1]) <# find delta with left shift #>
     $range--
     $ping_to = decimal_to_addr -decimal $start
-    $up_hosts = ping_range -addr $ping_to -range $range
+    $up_hosts = ping_range -addr $ping_to -range $range -quiet 0
   }
   else {
     return
   }
   write-host "Found " $up_hosts.count " hosts: "
-  $up_hosts |
-  % {
-    write-host $_
+  $up_hosts
+}
+
+
+function main_file_sweep {
+  
+  $user_file = read-host "Enter Filename >> "
+  if(test-path -path $user_file) {
+    [system.io.file]::readAllLines((Resolve-Path $user_file)) |
+    % {
+      $res += ping_range -addr $_ -range 1 -quiet 1
+    }
+    $res
+  } else {
+    main_file_sweep
   }
 }
+
+
+function main {
+  $user_resp = read-host "1. Ping sweep from file`n2. Ping sweep range/cidr`n>> "
+  if($user_resp -eq "1") {
+    main_file_sweep
+  } elseif ($user_resp -eq "2") {
+    main_ping_sweep
+  } else {
+    main
+  }
+}
+
 
 main
 
