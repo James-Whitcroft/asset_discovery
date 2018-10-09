@@ -41,7 +41,7 @@ function ping_range {
       $test = $test.split("=")
       $test = $test[-1]
       <# checkin TTL for OS guess 
-       # could be more accutate with hop count
+       # could be more accurate with hop count
        # but it is faster this way
        #>
       if([convert]::ToInt64($test, 10) -gt 100) {
@@ -51,8 +51,7 @@ function ping_range {
         if( -not $quiet) { write-host "Likely *nix OS" }
         $os = "Linux"
       }
-      
-      $up_hosts[$ping_to] = $os <# found a host, append to return array #>
+      $up_hosts[$ping_to] = $os <# found a host, add new entry #>
     }
     <# convert ip to decimal and increment by one #>
     $ping_to = (addr_to_decimal -addr $ping_to) + 1
@@ -105,7 +104,7 @@ function main_ping_sweep {
   else {
     return
   }
-  write-host "Found " $up_hosts.count " hosts: "
+  write-host "`nFound " $up_hosts.count " hosts: "
   $up_hosts
 }
 
