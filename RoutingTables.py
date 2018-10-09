@@ -3,6 +3,7 @@ import sys
 import paramiko
 import threading
 
+
 # Host class
 # Each host has an ip address, username, and password
 class Host():
