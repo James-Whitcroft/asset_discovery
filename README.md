@@ -15,6 +15,6 @@
 
 ### The RoutingTables.py script allows a user to remotely gather all the routing tables from a lists of hosts
 ### Call python3 RoutingTables.py rttest.json output.txt
-The json file is read and creates hosts based off of the file
-Connections are attempted to each host
-Runs route -n on each host and prints it to the output file
+* The json file is read and creates hosts based off of the file
+* Connections are attempted to each host
+* Runs route -n on each host and prints it to the output file
