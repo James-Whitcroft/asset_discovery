@@ -1,0 +1,19 @@
+{
+	"default ip": "0.0.0.0",
+	"default user": "root",
+	"default password": "root",
+	{		
+		"ip": "192.168.1.11 - 192.168.1.12",
+		"user": "root",
+		"password": "root"
+	},
+	{
+		"ip": "192.168.1.13",
+		"user": "Hello There",
+		"password": "General Kenobi"
+	},
+	{
+		"ip": "192.168.4.1-192.168.3.254"
+	}
+}
+
