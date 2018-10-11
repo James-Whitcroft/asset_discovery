@@ -1,5 +1,8 @@
 # asset_discovery
-
+#### The Dnstool.py is a python code which takes in a list of hostnames and returns the coresponding ip address on another fil location 
+*2 files are given 
+   *hostnamelist.txt shows an eample of how the hostnams should b formated 
+   *hostnameoutputfile.txt is th file in which th hostanem and addresseer are wrighten under 
 #### The ping_sweep powershell script allows for host detection and OS detection
 
 ##### Run with `.\ping_sweep.ps1`
